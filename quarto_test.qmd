@@ -1,0 +1,23 @@
+---
+title: "Quarto Test"
+format: html
+---
+
+# Quarto Test
+
+```{r}
+library(ggplot2)
+
+ggplot(data = diamonds, aes(x = carat, y = price)) +
+        geom_point()
+
+
+```
+
+```{r}
+# list the installed packages
+installed.packages()
+
+# Display only the names of installed packages (more readable)
+rownames(installed.packages())
+```

@@ -30,11 +30,10 @@ ENV VSCODE_INIT_R="R/session/init.R"
 # Create a directory for packages builds
 RUN mkdir pkgs
 
-COPY setting_files/*.sh setting_files/requirements.txt pkgs/
+COPY docker/setting_files/*.sh docker/setting_files/requirements.txt pkgs/
 
 # Install Debian dependencies
 RUN bash pkgs/install_debian.sh
-
 
 # Installing R
 RUN wget https://cran.rstudio.com/src/base/R-${R_VERSION_MAJOR}/R-${R_VERSION_MAJOR}.${R_VERSION_MINOR}.${R_VERSION_PATCH}.tar.gz && \
@@ -51,18 +50,16 @@ RUN locale-gen en_US.UTF-8
 
 WORKDIR /
 
-
 RUN bash pkgs/install_python.sh $VENV_NAME
 
 RUN bash pkgs/install_quarto.sh $QUARTO_VERSION
 
-COPY setting_files/*.R setting_files/*.json pkgs/
+COPY docker/setting_files/*.R docker/setting_files/*.json pkgs/
 RUN mv pkgs/packages_vscode.json pkgs/packages.json
 RUN Rscript pkgs/install_packages.R
 RUN rm pkgs/*.*
 
-
-COPY setting_files/.Rprofile root/
+COPY docker/setting_files/.Rprofile root/
 RUN echo "alias r='radian'" >> ~/.bashrc
 
 
