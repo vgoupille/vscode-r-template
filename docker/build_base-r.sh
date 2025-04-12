@@ -3,7 +3,7 @@
 echo "Build the docker"
 
 # Parameters
-user_name="rkrispin"
+user_name="vgoupille"
 image_label="baser"
 r_major=4
 r_minor=4
@@ -24,7 +24,7 @@ fi
 # Setting the image name
 ver=${r_major}.${r_minor}.${r_patch}
 tag="${CPU}.${ver}"
-docker_file=Dockerfile.base-r
+docker_file=docker/Dockerfile.base-r
 image_name=$user_name/$image_label:$tag
 
 echo "Image name: $image_name"
