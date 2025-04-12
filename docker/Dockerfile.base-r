@@ -1,6 +1,6 @@
 FROM ubuntu:22.04
 
-LABEL maintainer="Rami Krispin"
+LABEL maintainer="Valentin Goupille"
 
 # Set R version
 ARG R_VERSION_MAJOR=4

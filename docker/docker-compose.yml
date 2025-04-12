@@ -1,0 +1,25 @@
+services:
+  r-dev:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.base-r
+      args:
+        PYTHON_VER: 3.10
+        R_VERSION_MAJOR: 4
+        R_VERSION_MINOR: 4
+        R_VERSION_PATCH: 0
+        QUARTO_VERSION: 1.5.47
+        VENV_NAME: r-env
+    image: vgoupille/baser:${CPU:-amd64}.4.4.0
+    container_name: MY-CONTAINER-DivideProject
+    volumes:
+      - ..:/workspace
+    working_dir: /workspace
+    ports:
+      - "8787:8787"  # Pour RStudio Server si ajouté ultérieurement
+      - "8888:8888"  # Pour Jupyter Notebook si nécessaire
+      - "3838:3838"  # Pour Shiny Server
+      - "8050:8050"  # Pour Plotly Dash (version Python de Plotly)
+    environment:
+      - TERM=xterm-256color
+    command: tail -f /dev/null  # Garde le conteneur en cours d'exécution 
