@@ -21,3 +21,21 @@ installed.packages()
 # Display only the names of installed packages (more readable)
 rownames(installed.packages())
 ```
+
+
+```{r}
+plot(1:10)
+
+
+```
+
+
+```{r}
+ggplot(data = diamonds, aes(x = carat, y = price)) +
+        geom_point()
+
+
+```     
+
+
+

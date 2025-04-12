@@ -10,8 +10,11 @@ setwd("./pkgs/")
 # Required the remotes package
 install.packages("remotes", repos = "http://cran.rstudio.com/")
 #---- Load list of packages
+# Check if packages_temp.json exists, use it if it does
+package_file <- if(file.exists("packages_temp.json")) "packages_temp.json" else "packages.json"
+
 # Set the jq query
-jq_command <- 'jq -r ".packages[] |  [.package, .version] | @tsv" packages.json'
+jq_command <- sprintf('jq -r ".packages[] |  [.package, .version] | @tsv" %s', package_file)
 # Debug mode
 # jq_command <- 'jq -r ".package_dev[] |  [.package, .version] | @tsv" packages.json'
 

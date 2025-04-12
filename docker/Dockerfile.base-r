@@ -55,8 +55,14 @@ RUN bash pkgs/install_python.sh $VENV_NAME
 RUN bash pkgs/install_quarto.sh $QUARTO_VERSION
 
 COPY docker/setting_files/*.R docker/setting_files/*.json pkgs/
-RUN mv pkgs/packages_vscode.json pkgs/packages.json
-RUN Rscript pkgs/install_packages.R
+
+# Install VS Code packages
+RUN cp pkgs/packages_vscode.json pkgs/packages_temp.json && \
+    Rscript pkgs/install_packages.R && \
+    # Install regular packages
+    cp pkgs/packages.json pkgs/packages_temp.json && \
+    Rscript pkgs/install_packages.R
+
 RUN rm pkgs/*.*
 
 COPY docker/setting_files/.Rprofile root/
