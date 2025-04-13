@@ -1,0 +1,16 @@
+name: env1
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.10
+  - ipykernel
+  - numpy
+  - pandas
+  - matplotlib
+  - scikit-learn
+  - seaborn
+  - statsmodels
+  - pip
+  - pip:
+    - jupyterlab 

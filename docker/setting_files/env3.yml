@@ -1,0 +1,23 @@
+name: env3
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.10
+  - ipykernel
+  - numpy
+  - pandas
+  - tensorflow
+  - pytorch
+  - torchvision
+  - scikit-learn
+  - xgboost
+  - lightgbm
+  - catboost
+  - matplotlib
+  - seaborn
+  - mlflow
+  - pip
+  - pip:
+    - transformers
+    - huggingface_hub 

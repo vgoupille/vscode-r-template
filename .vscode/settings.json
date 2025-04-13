@@ -1,13 +1,26 @@
 {
-    "r.alwaysUseActiveTerminal": true,
-    "r.bracketedPaste": true,
-    "r.sessionWatcher": true,
-    "r.plot.useHttpgd": true,
-    "r.lsp.diagnostics": false,
-    "workbench.editor.showTabs": "multiple",
-    "r.rterm.option": [
-        "--no-save",
-        "--no-restore",
-        "--r-binary=/usr/local/bin/R"
-    ]
+  // Configuration pour R
+  "r.alwaysUseActiveTerminal": true,        // Utilise toujours le terminal actif pour les commandes R
+  "r.bracketedPaste": true,                 // Active le collage entre crochets pour R
+  "r.sessionWatcher": true,                 // Surveille la session R active
+  "r.plot.useHttpgd": true,                 // Utilise httpgd pour les graphiques R interactifs
+  "r.lsp.diagnostics": false,               // Désactive les diagnostics du Language Server Protocol pour R
+  "workbench.editor.showTabs": "multiple",  // Affiche les onglets dans l'éditeur uniquement s'il y a plusieurs fichiers
+  "r.rterm.option": ["--no-save", "--no-restore", "--r-binary=/usr/local/bin/R"],  // Options pour le terminal R
+
+  // Configuration pour Jupyter
+  "jupyter.jupyterServerType": "remote",    // Spécifie l'utilisation d'un serveur Jupyter distant
+  "jupyter.connectToJupyterServer": true,   // Se connecte automatiquement au serveur Jupyter au démarrage
+  "jupyter.jupyterServerURI": "http://localhost:8888"  // URL du serveur Jupyter dans le devcontainer
 }
+
+// si on veut utiliser radian sur un serveur distant (cluster)
+// {
+//     "r.rterm.linux": "/chemin/complet/vers/radian-apptainer.sh",
+//     "r.bracketedPaste": true,
+//     "r.alwaysUseActiveTerminal": true,
+//     "r.sessionWatcher": true,
+//     "editor.formatOnSave": true,
+//     "r.lsp.enabled": true,
+//     "r.plot.useHttpgd": true
+// }

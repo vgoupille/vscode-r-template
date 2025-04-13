@@ -1,12 +1,11 @@
 {
-  "name": "R Dev Environment",
+  "name": "R Development Environment with JupyterLab",
   "build": {
-    "dockerfile": "../docker/Dockerfile.base-r",
-    "context": "..",
-    "args": {
-      "BUILDKIT_INLINE_CACHE": "1"
-    }
+    "dockerfile": "../docker/Dockerfile.jupyter",
+    "context": ".."
   },
+  "workspaceFolder": "/workspace",
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached",
   "customizations": {
     "vscode": {
       "extensions": [
@@ -28,5 +27,8 @@
       ]
     }
   },
-  "postStartCommand": "until [ -f /root/.vscode-R/init.R ]; do sleep 0.1; done; radian"
+  "onCreateCommand": "mkdir -p /workspace",
+  //"postStartCommand": "until [ -f /root/.vscode-R/init.R ]; do sleep 0.1; done; radian", // This is the original command to start radian for rbase
+  "postStartCommand": "bash -c 'source ~/.bashrc && which radian && until [ -f /root/.vscode-R/init.R ]; do sleep 0.1; done && radian'",
+  "forwardPorts": [8888, 8889]
 }

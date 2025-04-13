@@ -10,4 +10,5 @@ fig <- plot_ly(
   type = "scatter", mode = "markers"
 )
 
-fig
+# Display the figure explicitly when sourcing
+print(fig)

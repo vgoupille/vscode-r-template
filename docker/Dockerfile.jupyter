@@ -1,0 +1,39 @@
+FROM vgoupille/baser:4.4.0
+
+LABEL maintainer="Valentin Goupille"
+
+# Create directory for files
+RUN mkdir -p /pkgs
+
+# Copy the conda environment files
+COPY docker/setting_files/env1.yml \
+     docker/setting_files/env2.yml \
+     docker/setting_files/env3.yml \
+     docker/setting_files/install_jupyterlab.sh \
+     /pkgs/
+
+# Make the script executable
+RUN chmod +x /pkgs/install_jupyterlab.sh
+
+# Install JupyterLab and configure environments
+RUN bash /pkgs/install_jupyterlab.sh
+
+# Install radian (R console)
+RUN pip install -U radian
+
+# Expose the JupyterLab port
+EXPOSE 8888
+
+# Clean up
+RUN apt-get clean && \
+    rm -rf /var/lib/apt/lists/* && \
+    rm -rf /tmp/*
+
+# Set the working directory
+WORKDIR /workspace
+
+# Create a volume for user data
+VOLUME /workspace
+
+# Set the default command to start JupyterLab
+CMD ["jupyter", "lab", "--ip=0.0.0.0", "--port=8888", "--no-browser", "--allow-root"] 

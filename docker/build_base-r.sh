@@ -2,6 +2,9 @@
 
 echo "Build the docker"
 
+# Enable BuildKit for faster builds
+export DOCKER_BUILDKIT=1
+
 # Parameters
 user_name="vgoupille"
 image_label="baser"

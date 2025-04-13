@@ -9,6 +9,7 @@ services:
       context: ..
       dockerfile: docker/Dockerfile.base-r
       args:
+        BUILDKIT_INLINE_CACHE: "1"
         PYTHON_VER: ${PYTHON_VER:-3.10}
         R_VERSION_MAJOR: ${R_VERSION_MAJOR:-4} # par défaut 4
         R_VERSION_MINOR: ${R_VERSION_MINOR:-4} # par défaut 4
@@ -28,3 +29,20 @@ services:
     environment:
       - TERM=xterm-256color
     command: tail -f /dev/null  # Garde le conteneur en cours d'exécution 
+
+  jupyter-r:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.jupyter
+      args:
+        BUILDKIT_INLINE_CACHE: "1"
+    image: vgoupille/jupyter-r:latest
+    container_name: JUPYTER-LAB-R-CONTAINER
+    volumes:
+      - ..:/workspace
+    working_dir: /workspace
+    ports:
+      - "8889:8888"  # JupyterLab sur un port différent pour ne pas conflit avec r-dev
+    environment:
+      - TERM=xterm-256color
+    command: jupyter lab --ip=0.0.0.0 --port=8888 --no-browser --allow-root
