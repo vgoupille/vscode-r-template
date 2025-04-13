@@ -1,0 +1,185 @@
+---
+title: "Python Analysis with Conda env3"
+jupyter: python3
+kernel: python3
+execute:
+  env: env3
+  activate: true
+format:
+  html:
+    code-fold: true
+    code-tools: true
+    code-link: true
+    toc: true
+    toc-depth: 3
+    number-sections: true
+    theme: cosmo
+    embed-resources: true
+    self-contained: true
+---
+
+# Python Analysis with Conda env3
+
+This document demonstrates how to use Python in a Quarto document with the conda env3 environment.
+
+## Setup
+
+First, let's verify our Python environment:
+
+```{python}
+import sys
+print(f"Python version: {sys.version}")
+print(f"Python executable: {sys.executable}")
+```
+
+## Data Analysis Example
+
+Let's create a simple example using pandas and matplotlib:
+
+```{python}
+import pandas as pd
+import matplotlib.pyplot as plt
+import numpy as np
+
+# Create some sample data
+data = pd.DataFrame({
+    'x': np.linspace(0, 10, 100),
+    'y': np.sin(np.linspace(0, 10, 100))
+})
+
+# Plot the data
+plt.figure(figsize=(10, 6))
+plt.plot(data['x'], data['y'])
+plt.title('Sine Wave Example')
+plt.xlabel('x')
+plt.ylabel('sin(x)')
+plt.grid(True)
+plt.show()
+```
+
+## Conclusion
+
+This document demonstrates the basic setup for using Python in Quarto with your conda env3 environment. 
+
+
+
+```{python}
+import seaborn as sns
+import matplotlib.pyplot as plt
+from sklearn.datasets import load_iris
+
+# Load the Iris dataset
+iris = load_iris()
+iris_df = sns.load_dataset('iris')
+
+# Set the style for better visualization
+sns.set(style="whitegrid")
+
+# Create a figure with multiple subplots
+plt.figure(figsize=(15, 10))
+
+# 1. Scatter plot of sepal length vs sepal width
+plt.subplot(2, 2, 1)
+sns.scatterplot(x='sepal_length', y='sepal_width', hue='species', data=iris_df)
+plt.title('Sepal Length vs Sepal Width')
+
+# 2. Scatter plot of petal length vs petal width
+plt.subplot(2, 2, 2)
+sns.scatterplot(x='petal_length', y='petal_width', hue='species', data=iris_df)
+plt.title('Petal Length vs Petal Width')
+
+# 3. Box plot of all features
+plt.subplot(2, 2, 3)
+sns.boxplot(data=iris_df.drop('species', axis=1))
+plt.title('Box Plot of All Features')
+plt.xticks(rotation=45)
+
+# 4. Pair plot
+plt.subplot(2, 2, 4)
+sns.pairplot(iris_df, hue='species')
+plt.suptitle('Iris Dataset Visualization', y=1.02)
+
+# Adjust layout and show plot
+plt.tight_layout()
+plt.show()
+
+# Additional: Correlation heatmap
+plt.figure(figsize=(8, 6))
+sns.heatmap(iris_df.drop('species', axis=1).corr(), annot=True, cmap='coolwarm')
+plt.title('Correlation Heatmap')
+plt.tight_layout()
+plt.show()
+```
+
+
+
+```{python}
+
+import plotly.express as px
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
+import pandas as pd
+import numpy as np
+from sklearn.datasets import load_iris
+
+# Load the Iris dataset
+iris = load_iris()
+iris_df = pd.DataFrame(iris.data, columns=iris.feature_names)
+iris_df['species'] = [iris.target_names[i] for i in iris.target]
+iris_df['species_num'] = iris.target  # Add numeric species column
+
+# Create a 3D scatter plot
+fig_3d = px.scatter_3d(iris_df, 
+                      x='sepal length (cm)', 
+                      y='sepal width (cm)', 
+                      z='petal length (cm)',
+                      color='species',
+                      title='3D Visualization of Iris Dataset')
+
+# Create a parallel coordinates plot
+fig_parallel = px.parallel_coordinates(iris_df, 
+                                     dimensions=['sepal length (cm)', 'sepal width (cm)',
+                                               'petal length (cm)', 'petal width (cm)'],
+                                     color='species_num',
+                                     color_continuous_scale=px.colors.qualitative.Set1,
+                                     title='Parallel Coordinates Plot of Iris Features')
+
+# Create a violin plot
+fig_violin = px.violin(iris_df, 
+                      y=['sepal length (cm)', 'sepal width (cm)', 
+                         'petal length (cm)', 'petal width (cm)'],
+                      color='species',
+                      title='Violin Plot of Iris Features')
+
+# Create a correlation heatmap
+corr_matrix = iris_df.drop(['species', 'species_num'], axis=1).corr()
+fig_heatmap = go.Figure(data=go.Heatmap(
+    z=corr_matrix.values,
+    x=corr_matrix.columns,
+    y=corr_matrix.columns,
+    colorscale='RdBu',
+    zmin=-1,
+    zmax=1
+))
+fig_heatmap.update_layout(title='Correlation Heatmap of Iris Features')
+
+# Create a scatter matrix
+fig_scatter = px.scatter_matrix(iris_df,
+                              dimensions=['sepal length (cm)', 'sepal width (cm)',
+                                        'petal length (cm)', 'petal width (cm)'],
+                              color='species',
+                              title='Scatter Matrix of Iris Features')
+
+```
+
+
+```{python}
+fig_scatter.show()
+# Show all plots
+fig_3d.show()
+fig_parallel.show()
+fig_violin.show()
+fig_heatmap.show()
+```
+
+

@@ -7,6 +7,11 @@
   "r.lsp.diagnostics": false,               // Désactive les diagnostics du Language Server Protocol pour R
   "workbench.editor.showTabs": "multiple",  // Affiche les onglets dans l'éditeur uniquement s'il y a plusieurs fichiers
   "r.rterm.option": ["--no-save", "--no-restore", "--r-binary=/usr/local/bin/R"],  // Options pour le terminal R
+  "r.environmentViewer.showAttachedNamespaces": true,  // Affiche les namespaces attachés
+  "r.environmentViewer.showLoadedNamespaces": true,    // Affiche les namespaces chargés
+  "r.environmentViewer.showGlobalEnvironment": true,   // Affiche l'environnement global
+  "r.environmentViewer.showPackageEnvironments": true, // Affiche les environnements des packages
+  "r.environmentViewer.showFunctionEnvironments": true, // Affiche les environnements des fonctions
 
   // Configuration pour Jupyter
   "jupyter.jupyterServerType": "remote",    // Spécifie l'utilisation d'un serveur Jupyter distant
