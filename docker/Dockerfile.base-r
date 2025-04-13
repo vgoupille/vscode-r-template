@@ -65,7 +65,7 @@ RUN cp pkgs/packages_vscode.json pkgs/packages_temp.json && \
 
 RUN rm pkgs/*.*
 
-COPY docker/setting_files/.Rprofile root/
+COPY docker/setting_files/.Rprofile /root/
 RUN echo "alias r='radian'" >> ~/.bashrc
 
 
