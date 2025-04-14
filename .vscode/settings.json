@@ -6,7 +6,9 @@
   "r.plot.useHttpgd": true,                 // Utilise httpgd pour les graphiques R interactifs
   "r.lsp.diagnostics": false,               // Désactive les diagnostics du Language Server Protocol pour R
   "workbench.editor.showTabs": "multiple",  // Affiche les onglets dans l'éditeur uniquement s'il y a plusieurs fichiers
-  "r.rterm.option": ["--no-save", "--no-restore", "--r-binary=/usr/local/bin/R"],  // Options pour le terminal R
+  "r.rterm.linux": "/usr/local/bin/R",      // Chemin explicite vers l'exécutable R
+  "r.rpath.linux": "/usr/local/bin/R",      // Chemin explicite vers l'exécutable R
+  "r.rterm.option": ["--no-save", "--no-restore"],  // Options pour le terminal R
   "r.environmentViewer.showAttachedNamespaces": true,  // Affiche les namespaces attachés
   "r.environmentViewer.showLoadedNamespaces": true,    // Affiche les namespaces chargés
   "r.environmentViewer.showGlobalEnvironment": true,   // Affiche l'environnement global

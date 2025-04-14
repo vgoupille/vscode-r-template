@@ -50,7 +50,7 @@ RUN rm -rf pkgs
 
 COPY docker/setting_files/.Rprofile /root/
 # Configure radian to use the conda environment
-RUN echo "alias r='conda run -n $CONDA_ENV_NAME radian'" >> ~/.bashrc && \
+RUN echo "alias radian='/opt/conda/envs/$CONDA_ENV_NAME/bin/radian'" >> ~/.bashrc && \
    # echo "alias starsolo='conda run -n $STARSOLO_ENV_NAME STAR'" >> ~/.bashrc && \
     echo "export RENV_PATHS_CACHE=/root/.renv/cache" >> ~/.bashrc
 

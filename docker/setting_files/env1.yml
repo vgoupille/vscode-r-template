@@ -29,4 +29,5 @@ dependencies:
   - palettable
   - pip
   - pip:
-    - jupyterlab 
+    - jupyterlab
+    - pydeseq2 

@@ -29,7 +29,6 @@
     }
   },
   "onCreateCommand": "mkdir -p /workspace",
-  //"postStartCommand": "until [ -f /root/.vscode-R/init.R ]; do sleep 0.1; done; radian", // This is the original command to start radian for rbase
-  "postStartCommand": "bash -c 'source ~/.bashrc && which radian && until [ -f /root/.vscode-R/init.R ]; do sleep 0.1; done && radian'",
+  "postStartCommand": "bash -c 'source ~/.bashrc && PYTHONIOENCODING=utf-8 TERM=xterm-256color /opt/conda/envs/env_radian/bin/radian --quiet'",
   "forwardPorts": [8888, 8889]
 }
