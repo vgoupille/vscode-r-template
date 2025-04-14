@@ -8,12 +8,13 @@ IMAGE_TAG = $(CPU).4.4.0
 
 # Variables for build args
 PYTHON_VER ?= 3.10
-R_VERSION_MAJOR ?= 4
-R_VERSION_MINOR ?= 4
-R_VERSION_PATCH ?= 0
+R_VERSION ?= 4.4.0
+R_VERSION_MAJOR = $(shell echo $(R_VERSION) | cut -d. -f1)
+R_VERSION_MINOR = $(shell echo $(R_VERSION) | cut -d. -f2)
+R_VERSION_PATCH = $(shell echo $(R_VERSION) | cut -d. -f3)
+CONDA_ENV_NAME ?= r-env
 QUARTO_VERSION ?= 1.5.47
 VENV_NAME ?= r-env
-R_VERSION = $(R_VERSION_MAJOR).$(R_VERSION_MINOR).$(R_VERSION_PATCH)
 
 # Docker compose file path
 DOCKER_COMPOSE = docker/docker-compose.yml
@@ -75,11 +76,9 @@ publish-multi-arch: login setup-buildx
 		--platform $(PLATFORMS) \
 		--file docker/Dockerfile.base-r \
 		--build-arg PYTHON_VER=$(PYTHON_VER) \
-		--build-arg R_VERSION_MAJOR=$(R_VERSION_MAJOR) \
-		--build-arg R_VERSION_MINOR=$(R_VERSION_MINOR) \
-		--build-arg R_VERSION_PATCH=$(R_VERSION_PATCH) \
+		--build-arg R_VERSION=$(R_VERSION) \
+		--build-arg CONDA_ENV_NAME=$(CONDA_ENV_NAME) \
 		--build-arg QUARTO_VERSION=$(QUARTO_VERSION) \
-		--build-arg VENV_NAME=$(VENV_NAME) \
 		-t $(IMAGE_NAME):$(R_VERSION) \
 		--push \
 		.
@@ -107,3 +106,13 @@ reset-docker:
 	else \
 		echo "Opération annulée"; \
 	fi 
+
+build-base-r:
+	docker build \
+		--build-arg R_VERSION=$(R_VERSION) \
+		--build-arg PYTHON_VER=$(PYTHON_VER) \
+		--build-arg CONDA_ENV_NAME=$(CONDA_ENV_NAME) \
+		--build-arg QUARTO_VERSION=$(QUARTO_VERSION) \
+		-f docker/Dockerfile.base-r \
+		-t $(IMAGE_NAME):$(R_VERSION) \
+		. 

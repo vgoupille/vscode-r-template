@@ -8,9 +8,10 @@ export DOCKER_BUILDKIT=1
 # Parameters
 user_name="vgoupille"
 image_label="baser"
-r_major=4
-r_minor=4
-r_patch=0
+r_version="4.4.0"
+r_major=$(echo $r_version | cut -d. -f1)
+r_minor=$(echo $r_version | cut -d. -f2)
+r_patch=$(echo $r_version | cut -d. -f3)
 quarto_ver="1.5.47"
 python_ver="3.10"
 venv_name="r-env"
@@ -36,9 +37,7 @@ echo "Image name: $image_name"
 docker build . \
   -f $docker_file --progress=plain \
   --build-arg PYTHON_VER=$python_ver \
-  --build-arg R_VERSION_MAJOR=$r_major \
-  --build-arg R_VERSION_MINOR=$r_minor \
-  --build-arg R_VERSION_PATCH=$r_patch \
+  --build-arg R_VERSION=$r_version \
   --build-arg QUARTO_VERSION=$quarto_ver \
   --build-arg VENV_NAME=$venv_name \
    -t $image_name

@@ -1,0 +1,10 @@
+Package: rna_seq_analysis
+Title: RNA-seq Analysis Project
+Version: 0.1.0
+Authors@R: 
+    person("Prénom", "Nom", , "email@example.com", role = c("aut", "cre"))
+Description: Analyse RNA-seq avec DESeq2 et edgeR
+License: MIT
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.2.3 

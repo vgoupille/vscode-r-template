@@ -1,0 +1,22 @@
+# R
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+
+# renv
+renv/library/
+renv/staging/
+
+# Données
+data/raw/
+data/processed/
+
+# Résultats
+results/*
+
+# Fichiers temporaires
+*.log
+*.tmp
+*.swp
+*.bak 

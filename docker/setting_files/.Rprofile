@@ -1,4 +1,16 @@
+# Configure renv
+if (file.exists("renv/activate.R")) {
+    source("renv/activate.R")
+}
+
+# Set CRAN mirror
 options(repos = Sys.getenv("CRAN_MIRROR"))
+
+# Configure renv settings
+options(renv.config.auto.snapshot = TRUE)
+options(renv.config.cache.enabled = TRUE)
+options(renv.config.sandbox.enabled = TRUE) # Active le sandboxing
+options(renv.config.install.verbose = TRUE) # Plus d'informations lors de l'installation
 
 # Source: https://github.com/REditorSupport/vscode-R/wiki/Plot-viewer#svg-in-httpgd-webpage
 if (interactive() && Sys.getenv("TERM_PROGRAM") == "vscode") {

@@ -3,6 +3,8 @@
 
 #ou sinon utiliser le script docker-compose-run.sh qui permet de lancer le conteneur avec l'architecture détectée par le script
 
+version: '3.8'
+
 services:
   r-dev:
     build:
