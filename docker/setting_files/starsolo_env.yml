@@ -1,0 +1,8 @@
+name: env_STARsolo
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - star=2.7.9  # Version spécifiée par l'utilisateur
+  - cufflinks=2.2.1

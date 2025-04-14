@@ -14,7 +14,7 @@ r_minor=$(echo $r_version | cut -d. -f2)
 r_patch=$(echo $r_version | cut -d. -f3)
 quarto_ver="1.5.47"
 python_ver="3.10"
-venv_name="r-env"
+venv_name="env_radian"  # Utilisé pour le nom de l'environnement conda
 
 # Identify the CPU type (M1 vs Intel)
 if [[ $(uname -m) ==  "aarch64" ]] ; then
@@ -39,7 +39,7 @@ docker build . \
   --build-arg PYTHON_VER=$python_ver \
   --build-arg R_VERSION=$r_version \
   --build-arg QUARTO_VERSION=$quarto_ver \
-  --build-arg VENV_NAME=$venv_name \
+  --build-arg CONDA_ENV_NAME=$venv_name \
    -t $image_name
 
 # Push

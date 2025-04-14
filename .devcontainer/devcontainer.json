@@ -1,7 +1,8 @@
 {
   "name": "R Development Environment with JupyterLab",
   "build": {
-    "dockerfile": "../docker/Dockerfile.jupyter",
+    // "dockerfile": "../docker/Dockerfile.jupyter",
+    "dockerfile": "../docker/Dockerfile.base-r",
     "context": ".."
   },
   "workspaceFolder": "/workspace",

@@ -1,38 +1,23 @@
-FROM ubuntu:22.04
+FROM rocker/r-ver:4.4.0
 
 LABEL maintainer="Valentin Goupille"
-
-# Set R version
-# Format: X.Y.Z where:
-# - X: Major version (e.g., 4)
-# - Y: Minor version (e.g., 4)
-# - Z: Patch version (e.g., 0)
-# Example: 4.4.0 for R version 4.4.0
-ARG R_VERSION=4.4.0
-ENV R_VERSION=$R_VERSION
-ENV R_VERSION_MAJOR=4
-ENV R_VERSION_MINOR=4
-ENV R_VERSION_PATCH=0
-
-# Validate R version format
-RUN if ! echo "$R_VERSION" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+$'; then \
-    echo "Error: R_VERSION must be in format X.Y.Z (e.g., 4.4.0)" && \
-    exit 1; \
-    fi
 
 # Setting the Python version
 ARG PYTHON_VER=3.10
 ENV PYTHON_VER=$PYTHON_VER
-ARG CONDA_ENV_NAME="r-env"
+ARG CONDA_ENV_NAME="env_radian"
 ENV CONDA_ENV_NAME=$CONDA_ENV_NAME
 ARG QUARTO_VERSION=1.5.43
 ENV QUARTO_VERSION=$QUARTO_VERSION
 ENV TZ=UTC
 ENV DEBIAN_FRONTEND=noninteractive
-ENV CONFIGURE_OPTIONS="--with-cairo --with-jpeglib --enable-R-shlib --with-blas --with-lapack"
 # CRAN Mirror
 ARG CRAN_MIRROR=https://cran.rstudio.com/
 ENV CRAN_MIRROR=$CRAN_MIRROR
+# renv settings for version control
+ENV RENV_CONFIG_SANDBOX_ENABLED=TRUE
+ENV RENV_CONFIG_AUTO_SNAPSHOT=FALSE
+ENV RENV_CONFIG_CACHE_ENABLED=TRUE
 # Radian Settings
 ENV R_PROFILE_USER="/root/.Rprofile"
 ENV TERM_PROGRAM="vscode"
@@ -41,46 +26,39 @@ ENV VSCODE_INIT_R="R/session/init.R"
 # Create a directory for packages builds
 RUN mkdir pkgs
 
-COPY docker/setting_files/*.sh docker/setting_files/requirements.txt docker/setting_files/environment.yml pkgs/
+# Copy only the necessary files for package installation
+COPY docker/setting_files/install_dependencies.sh docker/setting_files/install_miniconda.sh docker/setting_files/install_quarto.sh docker/setting_files/radian_env.yml docker/setting_files/starsolo_env.yml docker/setting_files/setup_renv.R pkgs/
 
-# Install Debian dependencies
-RUN bash pkgs/install_debian.sh
-
-# Installing R
-RUN wget https://cran.rstudio.com/src/base/R-${R_VERSION_MAJOR}/R-${R_VERSION}.tar.gz && \
-    tar zxvf R-${R_VERSION}.tar.gz && \
-    rm R-${R_VERSION}.tar.gz
-
-WORKDIR /R-${R_VERSION}
-
-RUN ./configure ${CONFIGURE_OPTIONS} && \
-    make && \
-    make install
-
-RUN locale-gen en_US.UTF-8
-
-WORKDIR /
+# Install dependencies
+RUN bash pkgs/install_dependencies.sh
 
 # Install Miniconda and create environment
 RUN bash pkgs/install_miniconda.sh $CONDA_ENV_NAME $PYTHON_VER
 
-# Install R packages
-COPY docker/setting_files/renv.lock /tmp/
-RUN R -e "install.packages('renv', repos = Sys.getenv('CRAN_MIRROR'))" && \
-    R -e "if (!requireNamespace('BiocManager', quietly = TRUE)) install.packages('BiocManager', repos = Sys.getenv('CRAN_MIRROR'))" && \
-    R -e "BiocManager::install(version = '3.19', ask = FALSE)" && \
-    mkdir -p /root/project && \
-    cd /root/project && \
-    R -e "renv::init(bare = TRUE)" && \
-    cp /tmp/renv.lock renv.lock && \
-    R -e "renv::restore()" && \
-    mkdir -p /workspace
+# Install R packages using renv
+# Note: All R packages and their versions are now managed in setup_renv.R
+RUN Rscript pkgs/setup_renv.R
 
+# Install Quarto
 RUN bash pkgs/install_quarto.sh $QUARTO_VERSION
+
+# Clean up
+RUN rm -rf pkgs
 
 COPY docker/setting_files/.Rprofile /root/
 # Configure radian to use the conda environment
 RUN echo "alias r='conda run -n $CONDA_ENV_NAME radian'" >> ~/.bashrc && \
+   # echo "alias starsolo='conda run -n $STARSOLO_ENV_NAME STAR'" >> ~/.bashrc && \
     echo "export RENV_PATHS_CACHE=/root/.renv/cache" >> ~/.bashrc
 
 
+
+
+#ARG STARSOLO_ENV_NAME="env_STARsolo"
+#ENV STARSOLO_ENV_NAME=$STARSOLO_ENV_NAME
+
+# Create STARsolo environment
+#RUN /opt/conda/bin/conda env create -f pkgs/starsolo_env.yml
+
+
+#RUN echo "alias starsolo='conda run -n $STARSOLO_ENV_NAME STAR'" >> ~/.bashrc && \

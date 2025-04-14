@@ -13,12 +13,9 @@ services:
       args:
         BUILDKIT_INLINE_CACHE: "1"
         PYTHON_VER: ${PYTHON_VER:-3.10}
-        R_VERSION_MAJOR: ${R_VERSION_MAJOR:-4} # par défaut 4
-        R_VERSION_MINOR: ${R_VERSION_MINOR:-4} # par défaut 4
-        R_VERSION_PATCH: ${R_VERSION_PATCH:-0} # par défaut 0
         QUARTO_VERSION: ${QUARTO_VERSION:-1.5.47} # par défaut 1.5.47
         VENV_NAME: ${VENV_NAME:-r-env} # par défaut r-env
-    image: vgoupille/baser:${CPU:-amd64}.${R_VERSION_MAJOR:-4}.${R_VERSION_MINOR:-4}.${R_VERSION_PATCH:-0}
+    image: vgoupille/baser:${CPU:-amd64}.${R_VERSION:-4.4.0}
     container_name: MY-CONTAINER-DivideProject
     volumes:
       - ..:/workspace

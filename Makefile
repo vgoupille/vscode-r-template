@@ -12,9 +12,9 @@ R_VERSION ?= 4.4.0
 R_VERSION_MAJOR = $(shell echo $(R_VERSION) | cut -d. -f1)
 R_VERSION_MINOR = $(shell echo $(R_VERSION) | cut -d. -f2)
 R_VERSION_PATCH = $(shell echo $(R_VERSION) | cut -d. -f3)
-CONDA_ENV_NAME ?= r-env
+CONDA_ENV_NAME ?= env_radian
 QUARTO_VERSION ?= 1.5.47
-VENV_NAME ?= r-env
+VENV_NAME ?= env_radian
 
 # Docker compose file path
 DOCKER_COMPOSE = docker/docker-compose.yml
@@ -76,7 +76,6 @@ publish-multi-arch: login setup-buildx
 		--platform $(PLATFORMS) \
 		--file docker/Dockerfile.base-r \
 		--build-arg PYTHON_VER=$(PYTHON_VER) \
-		--build-arg R_VERSION=$(R_VERSION) \
 		--build-arg CONDA_ENV_NAME=$(CONDA_ENV_NAME) \
 		--build-arg QUARTO_VERSION=$(QUARTO_VERSION) \
 		-t $(IMAGE_NAME):$(R_VERSION) \
@@ -108,11 +107,12 @@ reset-docker:
 	fi 
 
 build-base-r:
+	@echo "Building Docker image based on rocker/r-ver:$(R_VERSION) for $(CPU) architecture..."
 	docker build \
-		--build-arg R_VERSION=$(R_VERSION) \
+		--platform linux/$(CPU) \
 		--build-arg PYTHON_VER=$(PYTHON_VER) \
 		--build-arg CONDA_ENV_NAME=$(CONDA_ENV_NAME) \
 		--build-arg QUARTO_VERSION=$(QUARTO_VERSION) \
 		-f docker/Dockerfile.base-r \
-		-t $(IMAGE_NAME):$(R_VERSION) \
+		-t $(IMAGE_NAME):$(CPU).$(R_VERSION) \
 		. 
