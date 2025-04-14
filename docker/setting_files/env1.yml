@@ -1,9 +1,12 @@
-name: env1
+name: env_scanpy
 channels:
   - conda-forge
+  - bioconda
   - defaults
 dependencies:
   - python=3.10
+  - star=2.7.9  # Version spécifiée par l'utilisateur
+  - cufflinks=2.2.1
   - ipykernel
   - numpy
   - pandas
@@ -11,6 +14,19 @@ dependencies:
   - scikit-learn
   - seaborn
   - statsmodels
+  - scanpy
+  - anndata
+  - tensorflow
+  - pytorch
+  - torchvision
+  - plotly
+  - bokeh
+  - altair
+  - plotnine
+  - holoviews
+  - hvplot.pandas
+  - palmerpenguins 
+  - palettable
   - pip
   - pip:
     - jupyterlab 

@@ -3,18 +3,8 @@
 # Don't exit immediately on error for better error handling
 set +e
 
-# Detect architecture
-ARCH=$(uname -m)
-if [ "$ARCH" = "arm64" ] || [ "$ARCH" = "aarch64" ]; then
-    MINICONDA_URL="https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-aarch64.sh"
-else
-    MINICONDA_URL="https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh"
-fi
-
-echo "Detected architecture: $ARCH, using Miniconda URL: $MINICONDA_URL"
-
 # Verify YAML files exist
-for env_file in /pkgs/env1.yml /pkgs/env2.yml /pkgs/env3.yml; do
+for env_file in /pkgs/env1.yml /pkgs/starsolo_env.yml; do
     if [ ! -f "$env_file" ]; then
         echo "Error: Environment file $env_file not found!"
         exit 1
@@ -23,23 +13,8 @@ for env_file in /pkgs/env1.yml /pkgs/env2.yml /pkgs/env3.yml; do
     fi
 done
 
-# Install Miniconda
-cd /tmp
-echo "Downloading Miniconda..."
-wget -q $MINICONDA_URL -O miniconda.sh
-echo "Installing Miniconda..."
-bash miniconda.sh -b -p /opt/conda
-rm miniconda.sh
-
-# Add conda to path
+# Add conda to path (should already be in PATH from base image)
 export PATH="/opt/conda/bin:$PATH"
-echo 'export PATH="/opt/conda/bin:$PATH"' >> ~/.bashrc
-echo 'export PATH="/opt/conda/bin:$PATH"' >> ~/.profile
-
-# Initialize conda
-echo "Initializing conda..."
-conda init bash
-conda init zsh
 
 # Install basic packages in base environment
 echo "Installing basic packages in base environment..."
@@ -51,7 +26,7 @@ pip install -U radian
 
 # Create environments from YAML files
 echo "Creating conda environments..."
-for env_file in /pkgs/env1.yml /pkgs/env2.yml /pkgs/env3.yml; do
+for env_file in /pkgs/env1.yml /pkgs/starsolo_env.yml; do
     env_name=$(grep "name:" $env_file | head -1 | cut -d ":" -f2 | tr -d ' ')
     echo "Creating environment $env_name from $env_file..."
     
@@ -77,22 +52,24 @@ Rscript -e 'IRkernel::installspec(name = "R", displayname = "R")'
 echo "Configuring kernels for all environments..."
 python -m ipykernel install --user --name=base --display-name="Python (base)"
 
-# Configure kernels for each environment if they exist
-for env_name in env1 env2 env3; do
-    if [ -d "/opt/conda/envs/$env_name" ]; then
-        env_display_name="Python"
-        case $env_name in
-            "env1") env_display_name="Python (Data Science)" ;;
-            "env2") env_display_name="Python (Bioinformatics)" ;;
-            "env3") env_display_name="Python (Machine Learning)" ;;
-        esac
-        
-        echo "Configuring kernel for $env_name as '$env_display_name'..."
-        /opt/conda/envs/$env_name/bin/python -m ipykernel install --user --name=$env_name --display-name="$env_display_name"
-    else
-        echo "Warning: Environment $env_name not found, skipping kernel configuration."
-    fi
-done
+# Configure the Scanpy kernel if it exists
+if [ -d "/opt/conda/envs/env_scanpy" ]; then
+    echo "Configuring kernel for env_scanpy as 'Python (Scanpy)'..."
+    /opt/conda/envs/env_scanpy/bin/python -m ipykernel install --user --name=env_scanpy --display-name="Python (Scanpy)"
+else
+    echo "Warning: Environment env_scanpy not found, skipping kernel configuration."
+fi
+
+# Configure the STARsolo kernel if it exists
+if [ -d "/opt/conda/envs/env_STARsolo" ]; then
+    echo "Configuring kernel for env_STARsolo as 'Python (STARsolo)'..."
+    /opt/conda/envs/env_STARsolo/bin/python -m ipykernel install --user --name=env_STARsolo --display-name="Python (STARsolo)"
+    
+    # Add alias for STARsolo
+    echo "alias starsolo='conda run -n env_STARsolo STAR'" >> ~/.bashrc
+else
+    echo "Warning: Environment env_STARsolo not found, skipping kernel configuration."
+fi
 
 # Create a directory for JupyterLab config
 echo "Configuring JupyterLab..."
@@ -107,10 +84,6 @@ echo "c.NotebookApp.allow_root = True" >> /root/.jupyter/jupyter_notebook_config
 
 # Create aliases for JupyterLab
 echo "alias jupyterlab='jupyter lab --no-browser --ip=0.0.0.0 --allow-root'" >> ~/.bashrc
-
-# Make sure radian is in the PATH
-echo 'export PATH="/opt/conda/bin:$PATH"' >> ~/.bashrc
-echo "alias r='radian'" >> ~/.bashrc
 
 # Clean conda cache to reduce image size
 echo "Cleaning up..."

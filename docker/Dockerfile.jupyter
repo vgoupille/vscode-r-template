@@ -7,8 +7,7 @@ RUN mkdir -p /pkgs
 
 # Copy the conda environment files
 COPY docker/setting_files/env1.yml \
-     docker/setting_files/env2.yml \
-     docker/setting_files/env3.yml \
+     docker/setting_files/starsolo_env.yml \
      docker/setting_files/install_jupyterlab.sh \
      /pkgs/
 

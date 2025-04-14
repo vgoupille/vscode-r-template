@@ -35,6 +35,9 @@ RUN bash pkgs/install_dependencies.sh
 # Install Miniconda and create environment
 RUN bash pkgs/install_miniconda.sh $CONDA_ENV_NAME $PYTHON_VER
 
+# Make sure conda is in PATH for subsequent commands
+ENV PATH=/opt/conda/bin:$PATH
+
 # Install R packages using renv
 # Note: All R packages and their versions are now managed in setup_renv.R
 RUN Rscript pkgs/setup_renv.R

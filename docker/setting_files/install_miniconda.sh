@@ -27,6 +27,7 @@ echo "export PATH=/opt/conda/bin:$PATH" >> ~/.bashrc
 source ~/.bashrc
 
 # Create conda environment from yml file
-conda env create -f ./pkgs/radian_env.yml
+/opt/conda/bin/conda env create -f ./pkgs/radian_env.yml
 
-# Add conda activation to .bashrc 
+# Make sure conda environment is usable in non-interactive shells
+echo 'source /opt/conda/etc/profile.d/conda.sh' >> ~/.bashrc 
