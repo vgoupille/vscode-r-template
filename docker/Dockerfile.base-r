@@ -2,13 +2,17 @@ FROM ubuntu:22.04
 
 LABEL maintainer="Valentin Goupille"
 
-# Set R version
-ARG R_VERSION_MAJOR=4
-ARG R_VERSION_MINOR=4
-ARG R_VERSION_PATCH=0
-ENV R_VERSION_MAJOR=$R_VERSION_MAJOR
-ENV R_VERSION_MINOR=$R_VERSION_MINOR
-ENV R_VERSION_PATCH=$R_VERSION_PATCH
+# R version configuration
+ARG R_VERSION=4.4.0
+ENV R_VERSION=${R_VERSION}
+# Split R_VERSION into components
+RUN export R_VERSION_MAJOR=$(echo ${R_VERSION} | cut -d. -f1) && \
+    export R_VERSION_MINOR=$(echo ${R_VERSION} | cut -d. -f2) && \
+    export R_VERSION_PATCH=$(echo ${R_VERSION} | cut -d. -f3) && \
+    echo "R_VERSION_MAJOR=${R_VERSION_MAJOR}" >> /etc/environment && \
+    echo "R_VERSION_MINOR=${R_VERSION_MINOR}" >> /etc/environment && \
+    echo "R_VERSION_PATCH=${R_VERSION_PATCH}" >> /etc/environment
+
 # Setting the Python version
 ARG PYTHON_VER=3.10
 ENV PYTHON_VER=$PYTHON_VER
@@ -16,31 +20,37 @@ ARG VENV_NAME="r-env"
 ENV VENV_NAME=$VENV_NAME
 ARG QUARTO_VERSION=1.5.43
 ENV QUARTO_VERSION=$QUARTO_VERSION
+
+# Environment variables
 ENV TZ=UTC
 ENV DEBIAN_FRONTEND=noninteractive
 ENV CONFIGURE_OPTIONS="--with-cairo --with-jpeglib --enable-R-shlib --with-blas --with-lapack"
-# CRAN Mirror
-ARG CRAN_MIRROR=https://cran.rstudio.com/
-ENV CRAN_MIRROR=$CRAN_MIRROR
-# Radian Settings
+ENV CRAN_MIRROR=https://cran.rstudio.com/
 ENV R_PROFILE_USER="/root/.Rprofile"
 ENV TERM_PROGRAM="vscode"
 ENV VSCODE_INIT_R="R/session/init.R"
+ENV RENV_PATHS_CACHE="/renv/cache"
+ENV RENV_PATHS_LIBRARY="/renv/library"
+ENV PROJECTS_DIR="/projects"
+ENV GLOBAL_R_DIR="/global_r"
+ENV RENV_TEMPLATES_DIR="/renv_templates"
 
-# Create a directory for packages builds
-RUN mkdir pkgs
+# Create necessary directories
+RUN mkdir -p pkgs /renv/cache /renv/library ${PROJECTS_DIR} ${GLOBAL_R_DIR} ${RENV_TEMPLATES_DIR}
 
 COPY docker/setting_files/*.sh docker/setting_files/requirements.txt pkgs/
+COPY docker/renv_templates/*.lock ${RENV_TEMPLATES_DIR}/
 
 # Install Debian dependencies
 RUN bash pkgs/install_debian.sh
 
 # Installing R
-RUN wget https://cran.rstudio.com/src/base/R-${R_VERSION_MAJOR}/R-${R_VERSION_MAJOR}.${R_VERSION_MINOR}.${R_VERSION_PATCH}.tar.gz && \
-    tar zxvf R-${R_VERSION_MAJOR}.${R_VERSION_MINOR}.${R_VERSION_PATCH}.tar.gz && \
-    rm R-${R_VERSION_MAJOR}.${R_VERSION_MINOR}.${R_VERSION_PATCH}.tar.gz
+RUN . /etc/environment && \
+    wget https://cran.rstudio.com/src/base/R-${R_VERSION_MAJOR}/R-${R_VERSION}.tar.gz && \
+    tar zxvf R-${R_VERSION}.tar.gz && \
+    rm R-${R_VERSION}.tar.gz
 
-WORKDIR /R-${R_VERSION_MAJOR}.${R_VERSION_MINOR}.${R_VERSION_PATCH}
+WORKDIR /R-${R_VERSION}
 
 RUN ./configure ${CONFIGURE_OPTIONS} && \
     make && \
@@ -56,6 +66,111 @@ RUN bash pkgs/install_quarto.sh $QUARTO_VERSION
 
 COPY docker/setting_files/*.R docker/setting_files/*.json pkgs/
 
+# Install renv and other essential packages
+RUN R -e "install.packages(c('renv', 'devtools', 'remotes', 'jsonlite'), repos = '${CRAN_MIRROR}')"
+
+# Copy and use custom global renv.lock if provided
+ARG GLOBAL_RENV_LOCK_PATH
+COPY ${GLOBAL_RENV_LOCK_PATH:-docker/setting_files/renv.lock} /global_r/renv.lock
+
+# Initialize global R environment with custom renv.lock
+RUN cd ${GLOBAL_R_DIR} && \
+    R -e "renv::init(bare = TRUE)" && \
+    R -e "renv::restore()"
+
+# Create project management scripts
+RUN echo '#!/bin/bash\n\
+if [ ! -d "${PROJECTS_DIR}/$1" ]; then\n\
+    mkdir -p "${PROJECTS_DIR}/$1"\n\
+    cd "${PROJECTS_DIR}/$1"\n\
+    if [ "$2" == "--global" ]; then\n\
+        cp ${GLOBAL_R_DIR}/renv.lock .\n\
+        R -e "renv::init()"\n\
+        echo "Project $1 created with global R environment"\n\
+    elif [ "$2" == "--template" ] && [ -f "${RENV_TEMPLATES_DIR}/$3.lock" ]; then\n\
+        cp "${RENV_TEMPLATES_DIR}/$3.lock" renv.lock\n\
+        R -e "renv::init()"\n\
+        R -e "renv::restore()"\n\
+        echo "Project $1 created with template $3"\n\
+    elif [ -f "$3" ]; then\n\
+        cp "$3" renv.lock\n\
+        R -e "renv::init()"\n\
+        R -e "renv::restore()"\n\
+        echo "Project $1 created with custom renv.lock"\n\
+    else\n\
+        R -e "renv::init()"\n\
+        echo "Project $1 created with isolated R environment"\n\
+    fi\n\
+else\n\
+    echo "Project $1 already exists"\n\
+fi' > /usr/local/bin/create-project && \
+    chmod +x /usr/local/bin/create-project
+
+# Add template listing script
+RUN echo '#!/bin/bash\n\
+echo "Available templates:"\n\
+ls -1 ${RENV_TEMPLATES_DIR}/*.lock | sed "s/.*\\///;s/\\.lock$//"' > /usr/local/bin/list-templates && \
+    chmod +x /usr/local/bin/list-templates
+
+RUN echo '#!/bin/bash\n\
+if [ -d "${PROJECTS_DIR}/$1" ]; then\n\
+    cd "${PROJECTS_DIR}/$1"\n\
+    R -e "renv::snapshot()"\n\
+    echo "Packages snapshot created for project $1"\n\
+else\n\
+    echo "Project $1 does not exist"\n\
+fi' > /usr/local/bin/snapshot-project && \
+    chmod +x /usr/local/bin/snapshot-project
+
+RUN echo '#!/bin/bash\n\
+if [ -d "${PROJECTS_DIR}/$1" ]; then\n\
+    cd "${PROJECTS_DIR}/$1"\n\
+    R -e "renv::restore()"\n\
+    echo "Packages restored for project $1"\n\
+else\n\
+    echo "Project $1 does not exist"\n\
+fi' > /usr/local/bin/restore-project && \
+    chmod +x /usr/local/bin/restore-project
+
+# Advanced project management scripts
+RUN echo '#!/bin/bash\n\
+if [ -d "${PROJECTS_DIR}/$1" ]; then\n\
+    cd "${PROJECTS_DIR}/$1"\n\
+    R -e "cat(paste0(\"Project: $1\\n\")); \
+          cat(paste0(\"R Version: \", R.version.string, \"\\n\")); \
+          pkgs <- installed.packages(); \
+          cat(paste0(\"\\nInstalled Packages (\", nrow(pkgs), \"):\\n\")); \
+          cat(paste0(\"  - \", rownames(pkgs), \" (\", pkgs[, \"Version\"], \")\\n\", collapse = \"\"))"' > /usr/local/bin/list-project && \
+    chmod +x /usr/local/bin/list-project
+
+RUN echo '#!/bin/bash\n\
+if [ -d "${PROJECTS_DIR}/$1" ]; then\n\
+    cd "${PROJECTS_DIR}/$1"\n\
+    R -e "renv::snapshot()"\n\
+    git add renv.lock\n\
+    git commit -m \"Auto-snapshot packages for project $1\"\n\
+    echo "Auto-snapshot completed for project $1"\n\
+else\n\
+    echo "Project $1 does not exist"\n\
+fi' > /usr/local/bin/auto-snapshot && \
+    chmod +x /usr/local/bin/auto-snapshot
+
+RUN echo '#!/bin/bash\n\
+if [ -d "${PROJECTS_DIR}/$1" ]; then\n\
+    cd "${PROJECTS_DIR}/$1"\n\
+    if [ -f "R_version.json" ]; then\n\
+        R_VERSION=$(cat R_version.json | jq -r .R_version)\n\
+        echo "Using R version $R_VERSION for project $1"\n\
+        # Here you would implement the logic to switch R versions\n\
+        # This is a placeholder for the actual implementation\n\
+    else\n\
+        echo "No specific R version specified for project $1"\n\
+    fi\n\
+else\n\
+    echo "Project $1 does not exist"\n\
+fi' > /usr/local/bin/use-project-r && \
+    chmod +x /usr/local/bin/use-project-r
+
 # Install VS Code packages
 RUN cp pkgs/packages_vscode.json pkgs/packages_temp.json && \
     Rscript pkgs/install_packages.R && \
@@ -67,5 +182,8 @@ RUN rm pkgs/*.*
 
 COPY docker/setting_files/.Rprofile /root/
 RUN echo "alias r='radian'" >> ~/.bashrc
+
+# Set working directory
+WORKDIR /workspace
 
 

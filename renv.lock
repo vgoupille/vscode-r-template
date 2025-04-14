@@ -1,0 +1,27 @@
+{
+  "R": {
+    "Version": "4.4.0",
+    "Repositories": [
+      {
+        "Name": "CRAN",
+        "URL": "https://cran.rstudio.com"
+      }
+    ]
+  },
+  "Packages": {
+    "renv": {
+      "Package": "renv",
+      "Version": "1.0.3",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "a0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0"
+    },
+    "radian": {
+      "Package": "radian",
+      "Version": "0.5.0",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "a1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1"
+    }
+  }
+} 
